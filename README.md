@@ -50,7 +50,7 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
-### 2.10.24.1 (pendiente)
+### 2.10.24.1 (21/10/2026)
 
 - Base: `kamilwylegala/cakephp2-php8` al commit `b024bc1` (18/09/2026, "Fix readFile bypass for
   https urls in Xml::build()").
