@@ -55,6 +55,12 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 - Base: `kamilwylegala/cakephp2-php8` al commit `b024bc1` (18/09/2026, "Fix readFile bypass for
   https urls in Xml::build()").
 - CI: job `uejn` con PHP 8.2 y MySQL 8.0.
+- `Security::encrypt()`/`decrypt()` usan OpenSSL cuando mcrypt no está instalado, en vez de morir
+  con `Undefined constant "MCRYPT_RIJNDAEL_128"`. El formato es el mismo, así que lo cifrado con
+  mcrypt se sigue leyendo. Antes había que prender `Security.useOpenSsl` a mano; con mcrypt
+  instalado, sin esa clave, se sigue usando mcrypt como hasta ahora.
+- Tests para MySQL 8: aceptan `utf8mb3` (el nombre que usa MySQL desde 8.0.30 para `utf8`) y que
+  `int(11)` se describa sin ancho (desde 8.0.19). Sólo cambian los tests, no el driver.
 
 ---
 

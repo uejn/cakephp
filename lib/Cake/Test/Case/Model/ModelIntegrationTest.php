@@ -2238,6 +2238,13 @@ class ModelIntegrationTest extends BaseModelTest {
 		} else {
 			$intLength = 11;
 		}
+		// MySQL 8.0.19 dropped integer display widths: `int(11)` is described as `int`.
+		if ($this->db instanceof Mysql) {
+			$version = $this->db->getVersion();
+			if (stripos($version, 'mariadb') === false && version_compare($version, '8.0.19', '>=')) {
+				$intLength = null;
+			}
+		}
 		foreach (array('collate', 'charset', 'comment', 'unsigned') as $type) {
 			foreach ($result as $i => $r) {
 				unset($result[$i][$type]);
