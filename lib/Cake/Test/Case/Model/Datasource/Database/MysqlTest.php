@@ -694,9 +694,9 @@ class MysqlTest extends CakeTestCase {
 
 		$this->Dbo->rawQuery($result);
 		$result = $this->Dbo->listDetailedSources($this->Dbo->fullTableName('altertest', false, false));
-		$this->assertEquals('utf8_general_ci', $result['Collation']);
+		$this->assertEquals($this->_utf8('utf8_general_ci'), $result['Collation']);
 		$this->assertEquals('InnoDB', $result['Engine']);
-		$this->assertEquals('utf8', $result['charset']);
+		$this->assertEquals($this->_utf8('utf8'), $result['charset']);
 
 		$this->Dbo->rawQuery($this->Dbo->dropSchema($schemaA));
 	}
@@ -748,8 +748,8 @@ class MysqlTest extends CakeTestCase {
 		$result = $this->Dbo->readTableParameters($this->Dbo->fullTableName($tableName, false, false));
 		$this->Dbo->rawQuery('DROP TABLE ' . $table);
 		$expected = array(
-			'charset' => 'utf8',
-			'collate' => 'utf8_unicode_ci',
+			'charset' => $this->_utf8('utf8'),
+			'collate' => $this->_utf8('utf8_unicode_ci'),
 			'engine' => 'InnoDB');
 		$this->assertEquals($expected, $result);
 
@@ -786,14 +786,31 @@ class MysqlTest extends CakeTestCase {
 	}
 
 /**
+ * The name the server uses for the legacy 3-byte utf8.
+ *
+ * MySQL 8.0.30 renamed `utf8` to `utf8mb3` (and `utf8_*` collations to
+ * `utf8mb3_*`), and reports the new name even for tables created as `utf8`.
+ *
+ * @param string $name A charset or collation name starting with `utf8`.
+ * @return string
+ */
+	protected function _utf8($name) {
+		$this->Dbo->cacheSources = false;
+		if ($this->Dbo->getCharsetName('utf8mb3_general_ci') === 'utf8mb3') {
+			return preg_replace('/^utf8(?=_|$)/', 'utf8mb3', $name);
+		}
+		return $name;
+	}
+
+/**
  * testGetCharsetName method
  *
  * @return void
  */
 	public function testGetCharsetName() {
 		$this->Dbo->cacheSources = $this->Dbo->testing = false;
-		$result = $this->Dbo->getCharsetName('utf8_unicode_ci');
-		$this->assertEquals('utf8', $result);
+		$result = $this->Dbo->getCharsetName($this->_utf8('utf8_unicode_ci'));
+		$this->assertEquals($this->_utf8('utf8'), $result);
 		$result = $this->Dbo->getCharsetName('cp1250_general_ci');
 		$this->assertEquals('cp1250', $result);
 	}

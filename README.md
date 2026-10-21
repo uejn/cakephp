@@ -1,3 +1,69 @@
+# CakePHP 2 para PHP 8: versión de la UEJN
+
+Fork de [kamilwylegala/cakephp2-php8](https://github.com/kamilwylegala/cakephp2-php8), que a su vez
+es un fork de CakePHP 2.10.24 con los arreglos mínimos para PHP 8. Lo usa
+[AfiGestión](https://github.com/uejn/afigestion) para salir de PHP 7.1, que no tiene parches
+(uejn/afigestion#428, uejn/afigestion#429).
+
+**Por qué un fork propio y no el de kamilwylegala directo:** ése no tiene tags ni releases y se
+instala como `dev-master`, así que cualquier commit nuevo entraría a producción sin que nadie lo
+revise. Acá cada versión que usa AfiGestión es un tag.
+
+- **Exige PHP ≥ 8.0.** No anda en 7.x.
+- El nombre del paquete sigue siendo `cakephp/cakephp`, para que lo que depende de CakePHP (Croogo,
+  los plugins) lo encuentre sin cambios.
+- El CI corre el job de upstream (PHP 8.0/8.1) y el nuestro, `uejn`: PHP 8.2 con MySQL 8, lo que
+  corre en producción.
+
+## Versiones
+
+Los tags son `2.10.24.N` (`2.10.24.1`, `2.10.24.2`, …): composer los toma como más nuevos que el
+2.10.24 original. Cada tag tiene su entrada en "Cambios de la UEJN", abajo.
+
+En el `composer.json` de AfiGestión:
+
+```json
+{
+	"repositories": [
+		{ "type": "vcs", "url": "https://github.com/uejn/cakephp" }
+	],
+	"require": {
+		"cakephp/cakephp": "2.10.24.1"
+	}
+}
+```
+
+La versión va fija, sin `~` ni `^`: se sube a mano, con un PR en AfiGestión.
+
+## Traer los arreglos de kamilwylegala
+
+Una vez por mes, o cuando haya un arreglo de seguridad:
+
+```bash
+git remote add upstream https://github.com/kamilwylegala/cakephp2-php8.git   # la primera vez
+git fetch upstream
+git checkout -b uejn/upstream-AAAA-MM master
+git merge upstream/master
+```
+
+PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
+
+## Cambios de la UEJN
+
+### 2.10.24.1 (pendiente)
+
+- Base: `kamilwylegala/cakephp2-php8` al commit `b024bc1` (18/09/2026, "Fix readFile bypass for
+  https urls in Xml::build()").
+- CI: job `uejn` con PHP 8.2 y MySQL 8.0.
+- `Security::encrypt()`/`decrypt()` usan OpenSSL cuando mcrypt no está instalado, en vez de morir
+  con `Undefined constant "MCRYPT_RIJNDAEL_128"`. El formato es el mismo, así que lo cifrado con
+  mcrypt se sigue leyendo. Antes había que prender `Security.useOpenSsl` a mano; con mcrypt
+  instalado, sin esa clave, se sigue usando mcrypt como hasta ahora.
+- Tests para MySQL 8: aceptan `utf8mb3` (el nombre que usa MySQL desde 8.0.30 para `utf8`) y que
+  `int(11)` se describa sin ancho (desde 8.0.19). Sólo cambian los tests, no el driver.
+
+---
+
 # Fork of CakePHP 2 with support for PHP8
 
 ~~For original README content please check original repository: https://github.com/cakephp/cakephp/tree/2.x~~

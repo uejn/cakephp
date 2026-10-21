@@ -120,3 +120,78 @@ jobs:
 
       - name: Run Tests
         run: ./vendors/bin/phpunit --stderr --verbose lib/Cake/Test/Case/AllTestsTest.php
+
+  # Lo que corre la UEJN en producción: PHP 8.2 y MySQL 8. El job de arriba es
+  # el de kamilwylegala/cakephp2-php8 y se deja igual para que los merges de
+  # upstream no choquen.
+  uejn:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - '8.2'
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: cakephp_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=10
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+      memcached:
+        image: memcached
+        ports:
+          - 11211:11211
+
+    env:
+      DB: mysql
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: apcu, memcached, redis, intl, pdo_mysql
+          ini-values: |
+            assert.exception=1,
+            zend.assertions=1,
+            error_reporting=-1,
+            display_errors=On,
+            apc.enable_cli=1
+          tools: composer
+
+      - name: Enable Autoload
+        run: echo "require_once dirname(__DIR__, 2) . DS . 'vendors/autoload.php';" >> app/Config/bootstrap.php
+
+      - name: locale-gen
+        run: |
+          sudo locale-gen de_DE;
+          sudo locale-gen es_ES;
+
+      - name: Create Another Databases for MySQL
+        run: |
+          env MYSQL_PWD=root mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE cakephp_test2;';
+          env MYSQL_PWD=root mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE cakephp_test3;';
+
+      - name: Make temporary directories writable
+        run: chmod -R 777 ./app/tmp
+
+      - name: Install Composer Packages
+        run: composer install --no-ansi --no-interaction --no-progress
+
+      - name: Copy database.php
+        run: cp ./.github/workflows/configs/database.php ./app/Config/
+
+      - name: Run Tests
+        run: ./vendors/bin/phpunit --stderr lib/Cake/Test/Case/AllTestsTest.php

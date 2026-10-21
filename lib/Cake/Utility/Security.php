@@ -330,6 +330,19 @@ class Security {
 	}
 
 /**
+ * Whether encrypt()/decrypt() use OpenSSL instead of mcrypt.
+ *
+ * mcrypt is not bundled with PHP since 7.2, so on PHP 8 it is only there if it
+ * was installed from PECL. Without it, the mcrypt branch dies with an undefined
+ * constant; the OpenSSL branch produces the same format, so fall back to it.
+ *
+ * @return bool
+ */
+	protected static function _useOpenSsl() {
+		return Configure::read('Security.useOpenSsl') || !function_exists('mcrypt_encrypt');
+	}
+
+/**
  * Encrypt a value using AES-256.
  *
  * *Caveat* You cannot properly encrypt/decrypt data with trailing null bytes.
@@ -352,7 +365,7 @@ class Security {
 		// Generate the encryption and hmac key.
 		$key = substr(hash('sha256', $key . $hmacSalt), 0, 32);
 
-		if (Configure::read('Security.useOpenSsl')) {
+		if (static::_useOpenSsl()) {
 			$method = 'AES-256-CBC';
 			$ivSize = openssl_cipher_iv_length($method);
 			$iv = openssl_random_pseudo_bytes($ivSize);
@@ -419,7 +432,7 @@ class Security {
 			return false;
 		}
 
-		if (Configure::read('Security.useOpenSsl')) {
+		if (static::_useOpenSsl()) {
 			$method = 'AES-256-CBC';
 			$ivSize = openssl_cipher_iv_length($method);
 			$iv = substr($cipher, 0, $ivSize);
