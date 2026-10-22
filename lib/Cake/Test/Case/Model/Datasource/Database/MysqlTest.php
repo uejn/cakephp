@@ -4177,6 +4177,43 @@ SQL;
 	}
 
 /**
+ * Un CREATE/ALTER/DROP TABLE cierra la transacción en MySQL sin avisar. Desde PHP 8,
+ * PDO::commit() y PDO::rollBack() tiran "There is no active transaction" en ese caso.
+ *
+ * @return void
+ */
+	public function testCommitDespuesDeUnDdl() {
+		$this->Dbo->cacheMethods = false;
+		$this->assertTrue($this->Dbo->begin());
+		$this->Dbo->rawQuery('CREATE TABLE ddl_en_transaccion (id INT)');
+		try {
+			$this->assertTrue($this->Dbo->commit());
+			$this->assertTrue($this->Dbo->begin(), 'Se puede abrir otra transacción después');
+			$this->assertTrue($this->Dbo->commit());
+		} finally {
+			$this->Dbo->rawQuery('DROP TABLE IF EXISTS ddl_en_transaccion');
+		}
+	}
+
+/**
+ * Ver testCommitDespuesDeUnDdl(). El rollback no tiene nada que deshacer: devuelve false.
+ *
+ * @return void
+ */
+	public function testRollbackDespuesDeUnDdl() {
+		$this->Dbo->cacheMethods = false;
+		$this->assertTrue($this->Dbo->begin());
+		$this->Dbo->rawQuery('CREATE TABLE ddl_en_transaccion (id INT)');
+		try {
+			$this->assertFalse($this->Dbo->rollback());
+			$this->assertTrue($this->Dbo->begin(), 'Se puede abrir otra transacción después');
+			$this->assertTrue($this->Dbo->rollback());
+		} finally {
+			$this->Dbo->rawQuery('DROP TABLE IF EXISTS ddl_en_transaccion');
+		}
+	}
+
+/**
  * Test that value() quotes set values even when numeric.
  *
  * @return void

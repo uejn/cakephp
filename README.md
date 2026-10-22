@@ -50,6 +50,15 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
+### 2.10.24.2 (22/10/2026)
+
+- `DboSource::commit()`/`rollback()` no tiran `There is no active transaction` cuando un DDL
+  (`CREATE`/`ALTER`/`DROP TABLE`) ya cerró la transacción en MySQL. Desde PHP 8, PDO se entera
+  de ese cierre implícito; antes no. `commit()` devuelve `true` (lo hecho ya quedó grabado) y
+  `rollback()`, `false` (no queda nada que deshacer). Cualquier otro error de PDO se sigue
+  tirando. Lo necesita `cakedc/migrations`, que corre las migraciones dentro de una
+  transacción, y con él Croogo (uejn/afigestion#430).
+
 ### 2.10.24.1 (21/10/2026)
 
 - Base: `kamilwylegala/cakephp2-php8` al commit `b024bc1` (18/09/2026, "Fix readFile bypass for
