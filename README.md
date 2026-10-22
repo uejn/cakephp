@@ -50,6 +50,14 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
+### 2.10.24.4 (22/10/2026)
+
+- `CakeTestCase::getMock($clase)` (sin métodos, o con `array()`) reemplaza todos los métodos
+  públicos **menos los estáticos**, como PHPUnit 3.7. PHPUnit 9 no puede simular un estático y
+  corta con `BadMethodCallException` si se lo llama en el mock: pasaba con
+  `ControllerTestCase::generate()`, que simula `CakeRequest`, en cuanto algo llamaba a
+  `CakeRequest::header()` (por ejemplo `RequestHandlerComponent`).
+
 ### 2.10.24.3 (22/10/2026)
 
 - `CakeTestCase::getMock($clase, null)` no reemplaza ningún método, como en PHPUnit 3.7 y como

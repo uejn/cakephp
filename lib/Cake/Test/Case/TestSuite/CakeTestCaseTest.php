@@ -13,6 +13,10 @@ class CakeTestCaseGetMock {
 		return 'otro';
 	}
 
+	public static function estatico() {
+		return 'estatico';
+	}
+
 }
 
 /**
@@ -33,6 +37,7 @@ class CakeTestCaseGetMock {
  * @since         CakePHP v 1.2.0.4487
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
+App::uses('CakeRequest', 'Network');
 App::uses('CakePlugin', 'Core');
 App::uses('Controller', 'Controller');
 App::uses('Model', 'Model');
@@ -409,6 +414,27 @@ class CakeTestCaseTest extends CakeTestCase {
 	public function testAssertTextNotContains() {
 		$stringDirty = "some\nstring\r\nwith\rdifferent\nline endings!";
 		$this->assertTextNotContains("different\rlines", $stringDirty);
+	}
+
+/**
+ * getMock() sin métodos (o con array()) reemplaza todos menos los estáticos, como en
+ * PHPUnit 3.7: PHPUnit 9 no puede simularlos y corta cuando se los llama en un mock.
+ * ControllerTestCase::generate() simula así CakeRequest, que tiene header() estático.
+ *
+ * @return void
+ */
+	public function testGetMockSinMetodosDejaLosEstaticos() {
+		$Mock = $this->getMock('CakeTestCaseGetMock');
+		$this->assertNull($Mock->metodo());
+		$this->assertSame('estatico', $Mock::estatico());
+
+		$Mock = $this->getMock('CakeTestCaseGetMock', array());
+		$this->assertNull($Mock->metodo());
+		$this->assertSame('estatico', $Mock::estatico());
+
+		$Request = $this->getMock('CakeRequest');
+		$this->assertNull($Request->is('post'));
+		$this->assertFalse($Request::header('X-No-Existe'));
 	}
 
 /**
