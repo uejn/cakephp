@@ -4177,6 +4177,25 @@ SQL;
 	}
 
 /**
+ * Los números vuelven como texto, como en PHP 7. Desde PHP 8.1 pdo_mysql los devuelve como int
+ * (y los decimales como float), y las comparaciones estrictas de las apps escritas para Cake 2
+ * cambian de resultado sin avisar.
+ *
+ * @return void
+ */
+	public function testLosNumerosVuelvenComoTexto() {
+		$this->loadFixtures('Article');
+		$Article = ClassRegistry::init('Article');
+		$fila = $Article->find('first', array('fields' => array('id', 'user_id'), 'order' => 'Article.id', 'recursive' => -1));
+		$this->assertSame('1', $fila['Article']['id']);
+		$this->assertSame('1', $fila['Article']['user_id']);
+
+		$crudo = $this->Dbo->fetchAll('SELECT 10 AS diez, 2.5 AS medio');
+		$this->assertSame('10', $crudo[0][0]['diez']);
+		$this->assertSame('2.5', $crudo[0][0]['medio']);
+	}
+
+/**
  * Un CREATE/ALTER/DROP TABLE cierra la transacción en MySQL sin avisar. Desde PHP 8,
  * PDO::commit() y PDO::rollBack() tiran "There is no active transaction" en ese caso.
  *
