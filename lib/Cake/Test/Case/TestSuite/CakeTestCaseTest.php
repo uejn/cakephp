@@ -1,4 +1,20 @@
 <?php
+
+/**
+ * Clase para testGetMockConNullNoReemplazaNingunMetodo().
+ */
+class CakeTestCaseGetMock {
+
+	public function metodo() {
+		return 'original';
+	}
+
+	public function otro() {
+		return 'otro';
+	}
+
+}
+
 /**
  * CakeTestCaseTest file
  *
@@ -393,6 +409,25 @@ class CakeTestCaseTest extends CakeTestCase {
 	public function testAssertTextNotContains() {
 		$stringDirty = "some\nstring\r\nwith\rdifferent\nline endings!";
 		$this->assertTextNotContains("different\rlines", $stringDirty);
+	}
+
+/**
+ * getMock() con NULL como métodos no reemplaza ninguno, como en PHPUnit 3.7 y como dice su
+ * docblock. Con array() (o sin el parámetro) se reemplazan todos.
+ *
+ * @return void
+ */
+	public function testGetMockConNullNoReemplazaNingunMetodo() {
+		$Mock = $this->getMock('CakeTestCaseGetMock', null);
+		$this->assertInstanceOf('CakeTestCaseGetMock', $Mock);
+		$this->assertSame('original', $Mock->metodo());
+
+		$Mock = $this->getMock('CakeTestCaseGetMock');
+		$this->assertNull($Mock->metodo());
+
+		$Mock = $this->getMock('CakeTestCaseGetMock', array('metodo'));
+		$this->assertNull($Mock->metodo());
+		$this->assertSame('otro', $Mock->otro());
 	}
 
 /**

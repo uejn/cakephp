@@ -704,7 +704,10 @@ abstract class CakeTestCase extends \PHPUnit\Framework\TestCase {
 		$callAutoload = true
 	) {
 		$MockBuilder = $this->getMockBuilder($originalClassName);
-		if (!empty($methods)) {
+		if ($methods === null) {
+			// NULL no reemplaza ningún método (PHPUnit 3.7); array() los reemplaza todos.
+			$MockBuilder = $MockBuilder->onlyMethods(array());
+		} elseif (!empty($methods)) {
 			$MockBuilder = $MockBuilder->setMethods($methods);
 		}
 		if (!empty($arguments)) {
