@@ -50,6 +50,12 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
+### 2.10.24.3 (22/10/2026)
+
+- `CakeTestCase::getMock($clase, null)` no reemplaza ningún método, como en PHPUnit 3.7 y como
+  dice su docblock. Antes `null` se trataba igual que `array()` y los reemplazaba todos (todos
+  devolvían `null`). Lo usan 6 tests de Croogo.
+
 ### 2.10.24.2 (22/10/2026)
 
 - `DboSource::commit()`/`rollback()` no tiran `There is no active transaction` cuando un DDL
