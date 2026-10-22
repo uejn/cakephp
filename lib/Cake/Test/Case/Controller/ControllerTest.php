@@ -369,6 +369,29 @@ class AnotherTestController extends ControllerTestAppController {
 }
 
 /**
+ * El AppController de un plugin, para testMergeVarsSinAppController().
+ */
+class MergeSinAppAppController extends Controller {
+
+	public $components = array('Cookie');
+
+}
+
+/**
+ * Un controller de plugin cuyo $_mergeParent no existe (en los tests de una app, el AppController
+ * muchas veces no está cargado).
+ */
+class MergeSinAppController extends MergeSinAppAppController {
+
+	public $uses = false;
+
+	public $components = array('Session');
+
+	protected $_mergeParent = 'MergeSinAppNoExisteController';
+
+}
+
+/**
  * ControllerTest class
  *
  * @package       Cake.Test.Case.Controller
@@ -902,6 +925,23 @@ class ControllerTest extends CakeTestCase {
 
 		$Controller->expects($this->once())->method('_stop');
 		$Controller->redirect('https://cakephp.org');
+	}
+
+/**
+ * Si el $_mergeParent no existe, el controller de un plugin se arma igual y mezcla lo de su
+ * PluginAppController. En PHP 7 get_class_vars() de una clase que no existe daba false; en PHP 8
+ * es un TypeError.
+ *
+ * @return void
+ */
+	public function testMergeVarsSinAppController() {
+		$request = new CakeRequest('merge_sin_app/merge_sin_app/index');
+		$request->addParams(array('plugin' => 'merge_sin_app'));
+		$Controller = new MergeSinAppController($request);
+		$Controller->constructClasses();
+
+		$this->assertArrayHasKey('Session', Hash::normalize($Controller->components));
+		$this->assertArrayHasKey('Cookie', Hash::normalize($Controller->components));
 	}
 
 /**

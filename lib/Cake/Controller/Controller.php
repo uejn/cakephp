@@ -575,7 +575,8 @@ class Controller extends CakeObject implements CakeEventListener {
 		}
 
 		if ($mergeParent || !empty($pluginController)) {
-			$appVars = get_class_vars($this->_mergeParent);
+			// Ver CakeObject::_mergeVars(): si el $_mergeParent no existe, no aporta nada.
+			$appVars = class_exists($this->_mergeParent) ? get_class_vars($this->_mergeParent) : array();
 			$merge = array('components', 'helpers');
 			$this->_mergeVars($merge, $this->_mergeParent, true);
 		}
