@@ -50,6 +50,14 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
+### 2.10.24.6 (22/10/2026)
+
+- **MySQL devuelve los números como texto, como en PHP 7** (`PDO::ATTR_STRINGIFY_FETCHES`). Desde
+  PHP 8.1, pdo_mysql los devuelve como `int`/`float`: `'10'` pasa a ser `10` y las comparaciones
+  estrictas de las apps escritas para Cake 2 (`=== '10'`, `in_array(..., true)`, `assertSame`)
+  cambian de resultado sin avisar. Quien quiera los tipos nativos lo pide en `flags` del
+  `database.php`.
+
 ### 2.10.24.5 (22/10/2026)
 
 - `Controller::_mergeControllerVars()` y `CakeObject::_mergeVars()` no rompen si la clase de la

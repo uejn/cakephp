@@ -173,7 +173,11 @@ class Mysql extends DboSource {
 		$flags = $config['flags'] + array(
 			PDO::ATTR_PERSISTENT => $config['persistent'],
 			$mysqlAttrUseBufferedQuery => true,
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			// Los números como texto, como en PHP 7: desde PHP 8.1 pdo_mysql los devuelve como
+			// int/float y las comparaciones estrictas de las apps cambian de resultado. Quien
+			// quiera los tipos nativos lo pide en 'flags'.
+			PDO::ATTR_STRINGIFY_FETCHES => true,
 		);
 
 		if (!empty($config['encoding'])) {
