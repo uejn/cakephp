@@ -2465,7 +2465,16 @@ class DboSource extends DataSource {
 				$this->logQuery('COMMIT');
 			}
 			$this->_transactionStarted = false;
-			return $this->_connection->commit();
+			try {
+				return $this->_connection->commit();
+			} catch (PDOException $e) {
+				// MySQL cierra la transacción solo con un DDL (CREATE/ALTER/DROP TABLE). Desde
+				// PHP 8, PDO se entera y commit() tira "There is no active transaction".
+				if (!$this->_connection->inTransaction()) {
+					return true;
+				}
+				throw $e;
+			}
 		}
 
 		if ($this->nestedTransactionSupported()) {
@@ -2509,7 +2518,15 @@ class DboSource extends DataSource {
 				$this->logQuery('ROLLBACK');
 			}
 			$this->_transactionStarted = false;
-			return $this->_connection->rollBack();
+			try {
+				return $this->_connection->rollBack();
+			} catch (PDOException $e) {
+				// Ver commit(): si un DDL ya cerró la transacción no queda nada que deshacer.
+				if (!$this->_connection->inTransaction()) {
+					return false;
+				}
+				throw $e;
+			}
 		}
 
 		if ($this->nestedTransactionSupported()) {
