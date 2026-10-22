@@ -669,6 +669,31 @@ abstract class CakeTestCase extends \PHPUnit\Framework\TestCase {
 	// @codingStandardsIgnoreEnd
 
 /**
+ * Los métodos que getMock() reemplaza cuando no se le dice cuáles: los públicos que no son
+ * estáticos ni finales, sin el constructor ni el destructor. Los mismos que reemplaza PHPUnit 9
+ * por su cuenta, menos los estáticos.
+ *
+ * @param string $className La clase.
+ * @return array|null null si la clase no existe o es una interfaz: ahí decide PHPUnit.
+ */
+	protected function _metodosSimulables($className) {
+		if (!class_exists($className)) {
+			return null;
+		}
+		$metodos = array();
+		$Reflection = new ReflectionClass($className);
+		foreach ($Reflection->getMethods() as $Metodo) {
+			if ($Metodo->isStatic() || $Metodo->isFinal() || !$Metodo->isPublic() ||
+				$Metodo->isConstructor() || $Metodo->isDestructor() || $Metodo->getName() === '__clone'
+			) {
+				continue;
+			}
+			$metodos[] = $Metodo->getName();
+		}
+		return $metodos;
+	}
+
+/**
  * Returns a mock object for the specified class.
  *
  * @param string $originalClassName The class name of the object to be mocked.
@@ -709,6 +734,10 @@ abstract class CakeTestCase extends \PHPUnit\Framework\TestCase {
 			$MockBuilder = $MockBuilder->onlyMethods(array());
 		} elseif (!empty($methods)) {
 			$MockBuilder = $MockBuilder->setMethods($methods);
+		} elseif (($todos = $this->_metodosSimulables($originalClassName)) !== null) {
+			// Todos menos los estáticos, como PHPUnit 3.7: PHPUnit 9 no puede simularlos y
+			// corta si se los llama en el mock (CakeRequest::header(), en generate()).
+			$MockBuilder = $MockBuilder->onlyMethods($todos);
 		}
 		if (!empty($arguments)) {
 			$MockBuilder = $MockBuilder->setConstructorArgs($arguments);
