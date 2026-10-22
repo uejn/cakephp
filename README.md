@@ -50,9 +50,11 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
-### 2.10.25.0 (PHP 8.5)
+### 2.10.25.0 (22/10/2026, PHP 8.5)
 
-- CI: el job `uejn` corre también en PHP 8.5.
+- CI: el job `uejn` corre también en PHP 8.5 (4080 tests, sin fallas).
+- `DebuggerTest::testExcerpt` acepta el `highlight_string()` de PHP 8.3+ y `ValidationTest` usa
+  `(float)` en vez de `(double)`, deprecado en 8.5.
 - `CakeNumber::enteroModular()`: un número como `int` igual que `(int)` de un `float` hasta PHP 8.4
   (módulo 2^64 si no entra), sin el warning que da PHP 8.5. Lo usan la semilla de
   `Security::cipher()` (cambiarla dejaría ilegibles las cookies ya cifradas: es el mismo valor) y
