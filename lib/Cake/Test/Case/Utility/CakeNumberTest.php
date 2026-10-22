@@ -739,6 +739,25 @@ class CakeNumberTest extends CakeTestCase {
 	}
 
 /**
+ * enteroModular() da lo mismo que (int) de un float hasta PHP 8.4 (módulo 2^64), sin el warning
+ * que PHP 8.5 da cuando el float no entra en un int. Los valores salen de PHP 8.4.
+ *
+ * @return void
+ */
+	public function testEnteroModular() {
+		$this->assertSame(5854301283581689856, CakeNumber::enteroModular('76859309657453542496749683645'));
+		$this->assertSame(5212423987472105472, CakeNumber::enteroModular(300000000000000000000000000000));
+		$this->assertSame(0, CakeNumber::enteroModular(1.844674407370955E+20));
+		$this->assertSame(-2708362800119414784, CakeNumber::enteroModular(-7.5E+25));
+		$this->assertSame(553255926290448384, CakeNumber::enteroModular('1.9e19'));
+		$this->assertSame(0, CakeNumber::enteroModular(1.0E+300));
+		$this->assertSame(0, CakeNumber::enteroModular(INF));
+		$this->assertSame(0, CakeNumber::enteroModular(NAN));
+		$this->assertSame(123, CakeNumber::enteroModular(123));
+		$this->assertSame(-5, CakeNumber::enteroModular('-5.9'));
+	}
+
+/**
  * testFromReadableSize
  *
  * @dataProvider filesizes

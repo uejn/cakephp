@@ -17,6 +17,7 @@
  */
 
 App::uses('CakeText', 'Utility');
+App::uses('CakeNumber', 'Utility');
 
 /**
  * Security Library contains utility methods related to security
@@ -223,7 +224,7 @@ class Security {
 			return '';
 		}
 
-		srand((int)(float)Configure::read('Security.cipherSeed'));
+		srand(CakeNumber::enteroModular(Configure::read('Security.cipherSeed')));
 		$out = '';
 		$keyLength = strlen($key);
 		for ($i = 0, $textLength = strlen($text); $i < $textLength; $i++) {

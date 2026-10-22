@@ -19,6 +19,7 @@
 App::uses('DataSource', 'Model/Datasource');
 App::uses('PDOExceptionWithQueryString', 'Model/Datasource');
 App::uses('CakeText', 'Utility');
+App::uses('CakeNumber', 'Utility');
 App::uses('View', 'View');
 
 /**
@@ -3083,6 +3084,14 @@ class DboSource extends DataSource {
 	public function limit($limit, $offset = null) {
 		if ($limit) {
 			$rt = ' LIMIT';
+			// Un float que no entra en un int da un warning en %u desde PHP 8.5 (una página
+			// gigante desborda el offset): mismo valor que antes, sin él.
+			if (is_float($offset)) {
+				$offset = CakeNumber::enteroModular($offset);
+			}
+			if (is_float($limit)) {
+				$limit = CakeNumber::enteroModular($limit);
+			}
 
 			if ($offset) {
 				$rt .= sprintf(' %u,', $offset);
