@@ -194,7 +194,9 @@ class CakeObject {
  * @return void
  */
 	protected function _mergeVars($properties, $class, $normalize = true) {
-		$classProperties = get_class_vars($class);
+		// Una clase que no existe no aporta nada. En PHP 7 get_class_vars() daba false; en PHP 8
+		// es un TypeError (pasa con el AppController de una app en sus tests).
+		$classProperties = class_exists($class) ? get_class_vars($class) : array();
 		foreach ($properties as $var) {
 			if (isset($classProperties[$var]) &&
 				!empty($classProperties[$var]) &&

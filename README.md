@@ -50,6 +50,13 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
+### 2.10.24.5 (22/10/2026)
+
+- `Controller::_mergeControllerVars()` y `CakeObject::_mergeVars()` no rompen si la clase de la
+  que mezclan (el `AppController`) no existe: no aporta nada, como en PHP 7, donde
+  `get_class_vars()` devolvía `false`. En PHP 8 es un `TypeError`, y le pasaba a cada controller
+  de plugin en los tests de una app que no cargan su `AppController`.
+
 ### 2.10.24.4 (22/10/2026)
 
 - `CakeTestCase::getMock($clase)` (sin métodos, o con `array()`) reemplaza todos los métodos
