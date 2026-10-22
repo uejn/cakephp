@@ -127,6 +127,33 @@ class CakeNumber {
 	}
 
 /**
+ * Un número como int, igual que (int) de un float hasta PHP 8.4: si no entra en un int, módulo 2^64
+ * (y 0 para INF y NAN). PHP 8.5 da un warning en ese caso; esto da el mismo valor sin él. Lo usan
+ * la semilla de Security::cipher() (cambiarla dejaría ilegibles las cookies ya cifradas) y el
+ * LIMIT de DboSource.
+ *
+ * @param int|float|string $numero El número.
+ * @return int
+ */
+	public static function enteroModular($numero) {
+		$numero = (float)$numero;
+		if (!is_finite($numero)) {
+			return 0;
+		}
+		if ($numero >= -9.2233720368547758E+18 && $numero < 9.2233720368547758E+18) {
+			return (int)$numero;
+		}
+		$resto = fmod($numero, 18446744073709551616.0);
+		if ($resto < 0) {
+			$resto += 18446744073709551616.0;
+		}
+		if ($resto >= 9223372036854775808.0) {
+			$resto -= 18446744073709551616.0;
+		}
+		return (int)$resto;
+	}
+
+/**
  * Converts filesize from human readable string to bytes
  *
  * @param string $size Size in human readable string like '5MB', '5M', '500B', '50kb' etc.
