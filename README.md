@@ -50,6 +50,13 @@ PR contra `master` de este repo; con el CI en verde, merge y tag nuevo.
 
 ## Cambios de la UEJN
 
+### 2.10.25.1 (27/10/2026)
+
+- `Validation::uploadedFile()` ignora `full_path`, la clave que PHP 8.1+ agrega a cada archivo de
+  `$_FILES` y que `CakeRequest` copia a `$this->request->data`. La regla exige exactamente
+  `error`, `name`, `size`, `tmp_name` y `type`, así que con PHP 8.5 rechazaba **toda** subida
+  real: en AfiGestión no entraba ningún archivo por migrators/files/add.
+
 ### 2.10.25.0 (22/10/2026, PHP 8.5)
 
 - CI: el job `uejn` corre también en PHP 8.5 (4080 tests, sin fallas).
