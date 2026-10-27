@@ -1033,6 +1033,10 @@ class Validation {
 		if (!is_array($file)) {
 			return false;
 		}
+		// PHP 8.1+ adds `full_path` to every uploaded file. It is not part of
+		// the shape this rule checks, so it is ignored instead of failing every
+		// real upload.
+		unset($file['full_path']);
 		$keys = array('error', 'name', 'size', 'tmp_name', 'type');
 		ksort($file);
 		if (array_keys($file) != $keys) {

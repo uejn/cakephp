@@ -2478,6 +2478,29 @@ class ValidationTest extends CakeTestCase {
 	}
 
 /**
+ * Test uploaded file validation with the `full_path` key that PHP 8.1+ adds
+ * to every file in $_FILES.
+ *
+ * @return void
+ */
+	public function testUploadedFileFullPath() {
+		$file = array(
+			'name' => 'cake.power.gif',
+			'full_path' => 'cake.power.gif',
+			'tmp_name' => CORE_PATH . 'Cake' . DS . 'Test' . DS . 'test_app' . DS . 'webroot/img/cake.power.gif',
+			'error' => UPLOAD_ERR_OK,
+			'type' => 'image/gif',
+			'size' => 201
+		);
+		$this->assertTrue(ValidationStub::uploadedFile($file));
+		$file['error'] = UPLOAD_ERR_NO_FILE;
+		$this->assertFalse(ValidationStub::uploadedFile($file), 'Error upload should fail.');
+		unset($file['name']);
+		$file['error'] = UPLOAD_ERR_OK;
+		$this->assertFalse(ValidationStub::uploadedFile($file), 'Missing keys should fail.');
+	}
+
+/**
  * Test uploaded file validation.
  *
  * @return void
